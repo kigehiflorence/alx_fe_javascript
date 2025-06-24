@@ -7,9 +7,12 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 // Load last selected category filter from localStorage
 let lastFilter = localStorage.getItem("lastFilter") || "all";
 
+// Also declare selectedCategory (for flexibility)
+let selectedCategory = lastFilter;
+
 // Show a random quote
 function showRandomQuote() {
-  const filteredQuotes = quotes.filter(q => lastFilter === "all" || q.category === lastFilter);
+  const filteredQuotes = quotes.filter(q => selectedCategory === "all" || q.category === selectedCategory);
   const random = filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
   const display = document.getElementById("quoteDisplay");
   display.innerHTML = random
@@ -28,13 +31,14 @@ function populateCategories() {
     option.textContent = cat;
     select.appendChild(option);
   });
-  select.value = lastFilter;
+  select.value = selectedCategory;
 }
 
 // Filter quotes based on selected category
 function filterQuotes() {
   const category = document.getElementById("categoryFilter").value;
   lastFilter = category;
+  selectedCategory = category;
   localStorage.setItem("lastFilter", category);
   showRandomQuote();
 }
