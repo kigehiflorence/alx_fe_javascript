@@ -119,14 +119,29 @@ function createAddQuoteForm() {
   formContainer.appendChild(addButton);
 }
 
-// Simulate periodic server sync (logs simulated response)
-function syncWithServer() {
+// Fetch quotes from server and merge with local quotes
+function fetchQuotesFromServer() {
   fetch("https://jsonplaceholder.typicode.com/posts")
     .then(response => response.json())
     .then(serverData => {
-      console.log("Simulated server sync complete");
-      // Could add conflict resolution logic here if needed
-    });
+      // Map posts to quote format
+      const newQuotes = serverData.slice(0, 5).map(item => ({
+        text: item.title,
+        category: "Server"
+      }));
+
+      quotes.push(...newQuotes);
+      saveQuotes();
+      populateCategories();
+      console.log("Fetched and merged new quotes from server.");
+    })
+    .catch(error => console.error("Error fetching quotes from server:", error));
+}
+
+// Simulate periodic server sync (calls fetchQuotesFromServer)
+function syncWithServer() {
+  console.log("Syncing with server...");
+  fetchQuotesFromServer();
 }
 
 // Sync every 30 seconds
