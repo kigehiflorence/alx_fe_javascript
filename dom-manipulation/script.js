@@ -159,10 +159,42 @@ async function postQuoteToServer(quote) {
   }
 }
 
+// Full sync: fetch from server and post local quotes to server
+async function syncQuotes() {
+  console.log("Starting full quote sync...");
+
+  try {
+    // Fetch from server
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
+
+    // Convert server data to quote objects
+    const serverQuotes = serverData.slice(0, 5).map(item => ({
+      text: item.title,
+      category: "Server"
+    }));
+
+    // Merge server quotes into local
+    quotes.push(...serverQuotes);
+    saveQuotes();
+    populateCategories();
+    console.log("Fetched and merged server quotes.");
+
+    // Post all local quotes to server
+    for (const quote of quotes) {
+      await postQuoteToServer(quote);
+    }
+
+    console.log("Local quotes synced to server.");
+  } catch (error) {
+    console.error("Error during full quote sync:", error);
+  }
+}
+
 // Simulate periodic server sync
 async function syncWithServer() {
   console.log("Syncing with server...");
-  await fetchQuotesFromServer();
+  await syncQuotes();
 }
 
 // Sync every 30 seconds
