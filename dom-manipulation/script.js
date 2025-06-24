@@ -6,8 +6,6 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 
 // Load last selected category filter from localStorage
 let lastFilter = localStorage.getItem("lastFilter") || "all";
-
-// Also declare selectedCategory (for flexibility)
 let selectedCategory = lastFilter;
 
 // Show a random quote
@@ -49,7 +47,7 @@ function saveQuotes() {
 }
 
 // Add a new quote
-function addQuote() {
+async function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
   const category = document.getElementById("newQuoteCategory").value.trim();
 
@@ -58,13 +56,17 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+  quotes.push(newQuote);
   saveQuotes();
   populateCategories();
   showRandomQuote();
 
   document.getElementById("newQuoteText").value = '';
   document.getElementById("newQuoteCategory").value = '';
+
+  // Send new quote to server
+  await postQuoteToServer(newQuote);
 }
 
 // Export quotes to a JSON file
@@ -125,7 +127,6 @@ async function fetchQuotesFromServer() {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
     const serverData = await response.json();
 
-    // Map posts to quote format
     const newQuotes = serverData.slice(0, 5).map(item => ({
       text: item.title,
       category: "Server"
@@ -140,7 +141,25 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// Simulate periodic server sync (calls fetchQuotesFromServer)
+// Send a new quote to server via POST
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quote)
+    });
+
+    const result = await response.json();
+    console.log("Quote posted to server:", result);
+  } catch (error) {
+    console.error("Error posting quote to server:", error);
+  }
+}
+
+// Simulate periodic server sync
 async function syncWithServer() {
   console.log("Syncing with server...");
   await fetchQuotesFromServer();
