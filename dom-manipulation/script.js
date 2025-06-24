@@ -120,28 +120,30 @@ function createAddQuoteForm() {
 }
 
 // Fetch quotes from server and merge with local quotes
-function fetchQuotesFromServer() {
-  fetch("https://jsonplaceholder.typicode.com/posts")
-    .then(response => response.json())
-    .then(serverData => {
-      // Map posts to quote format
-      const newQuotes = serverData.slice(0, 5).map(item => ({
-        text: item.title,
-        category: "Server"
-      }));
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
 
-      quotes.push(...newQuotes);
-      saveQuotes();
-      populateCategories();
-      console.log("Fetched and merged new quotes from server.");
-    })
-    .catch(error => console.error("Error fetching quotes from server:", error));
+    // Map posts to quote format
+    const newQuotes = serverData.slice(0, 5).map(item => ({
+      text: item.title,
+      category: "Server"
+    }));
+
+    quotes.push(...newQuotes);
+    saveQuotes();
+    populateCategories();
+    console.log("Fetched and merged new quotes from server.");
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
+  }
 }
 
 // Simulate periodic server sync (calls fetchQuotesFromServer)
-function syncWithServer() {
+async function syncWithServer() {
   console.log("Syncing with server...");
-  fetchQuotesFromServer();
+  await fetchQuotesFromServer();
 }
 
 // Sync every 30 seconds
